@@ -90,9 +90,83 @@ Let X be the Random Variable for how much customers like the regular website. Le
 
 \newpage
 ## Test Assumptions
+
 ### World Happiness
 
+You would like to know whether people in countries with high GDP per capita (higher than the mean) are more happy or less happy than people in countries with low GDP (lower than the mean).
+
+List all assumptions for a two-sample t-test. Then evaluate each assumption, presenting evidence based on your background knowledge, visualizations, and numerical summaries.
+
+```{r}
+happiness_dataset <- read.csv('datasets/happiness_WHR.csv')
+
+```
+
+Assumptions for a two-sample t-test:
+1.	Metric scale.
+
+```{r}
+summary(happiness_dataset$Life.Ladder)
+
+```
+Even though the life ladder scale is ordinal in nature, the data presented could be considered metric as it includes decimal averages for every individual in a country.
+
+For this reason, we believe that the assumption that we are using metric data is met.
+
+2.	IID data.
+
+Sample 1: Happiness in countries with high GDP per capita
+Sample 2: Happiness levels in countries with low GDP per capita
+
+Given the two samples, we believe that happiness level of one individual would not provide information about the happiness of another individual, making us conclude that these values are independent. 
+
+Provided that each individual's happiness level is derived from the same scale, we agreed that the values of the samples can also be considered identically distributed.
+
+For these two reasons, we believe the assumptions of IID are met.
+
+
+3.	No major deviations from normality, considering the sample size.
+
+```{R}
+
+summary(happiness_dataset$Log.GDP.per.capita)
+
+happiness_dataset$is_high_gdp<-happiness_dataset$Log.GDP.per.capita>9.584
+
+sum(!is.na(happiness_dataset$Life.Ladder[happiness_dataset$is_high_gdp==T]))
+sum(!is.na(happiness_dataset$Life.Ladder[happiness_dataset$is_high_gdp==F]))
+
+
+```
+Assuming that the samples are splitted based on the GDP per capita mean value of 9.584, we found that both samples sizes exceed 30, so the Central Limit Theorem approximates a normal distribution.
+
+For this reason, we conclude that there are no major deviations from normality, considering the sample size.
+
 ### Legislators
+
+```{R}
+
+legislators_current <- read.csv('datasets/legislators-current.csv')
+
+```
+
+Assumptions for a Wilcoxon rank-sum test (Hypothesis of Comparison):
+1.	Ordinal scale.
+
+```{R}
+?hist
+# make a column for age and plot it
+legislators_current$age <- 2022 - strtoi(substr(legislators_current$birthday, 1, 4))
+hist(legislators_current$age, main = 'Senator Age', breaks=20)
+
+```
+The senator age is calculated, using the current year 2022 minus the birthyear, as a discrete value from 0 to 100. There is no continuous relationship between two age interval (ie. 89, 90 are two distinct age). For that reason, the assumption that the age is on a ordinal scale is met.
+
+
+2.  IID
+
+The age of the senator is independent because a birth year of one senator does not provide any information to determine the birth year of another senator. The senator age is also identically distributed because it is derived from the same birth year convention on a regular calendar scale. For those reasons, the IID assumption is met!
+
 
 ### Wine and health
 
