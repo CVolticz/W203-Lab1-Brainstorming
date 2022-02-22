@@ -40,7 +40,7 @@ head(anes_timeseries)
 anes_data <- anes_timeseries[, c('V200001', 'V200004', 'V201006',
                              'V201018', 'V201024', 'V201031y', 
                              'V202119', 'V201228', 'V201229', 
-                             'V201230')]
+                             'V201230', 'V202123')]
 
 # Rename the columns
 anes_data <- anes_data %>%
@@ -53,7 +53,8 @@ anes_data <- anes_data %>%
   rename(difficult_to_vote = V202119) %>%
   rename(party_identification = V201228) %>%
   rename(strong_party_identification = V201229) %>%
-  rename(leaning_party_identification = V201230)
+  rename(leaning_party_identification = V201230) %>%
+  rename(reason_why_did_not_vote = V202123)
 
 # Rename the columns
 
