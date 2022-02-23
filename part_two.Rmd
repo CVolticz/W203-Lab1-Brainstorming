@@ -37,24 +37,23 @@ head(anes_timeseries)
 
 ```{r consolidate data}
 # selecting interesting columns to study
-anes_data <- anes_timeseries[, c('V200001', 'V200004', 'V201006',
-                             'V201018', 'V201024', 'V201031y', 
-                             'V202119', 'V201228', 'V201229', 
-                             'V201230', 'V202123')]
+anes_data <- anes_timeseries[, c('V200001', 'V201018', 'V201024', 
+                                 'V202120a', 'V202119', 'V201228', 
+                                 'V201229', 'V202123', 'V202066')]
 
 # Rename the columns
 anes_data <- anes_data %>%
   rename(case_id = V200001) %>%
-  rename(completed_interviews = V200004) %>%
-  rename(campaign_interest = V201006) %>%
   rename(registed_party = V201018) %>%
   rename(manner_of_vote = V201024) %>%
-  rename(time_before_vote_selection = V201031y) %>%
+  rename(difficulty_registering = V202120a) %>%
   rename(difficult_to_vote = V202119) %>%
   rename(party_identification = V201228) %>%
   rename(strong_party_identification = V201229) %>%
   rename(leaning_party_identification = V201230) %>%
-  rename(reason_why_did_not_vote = V202123)
+  rename(reason_why_did_not_vote = V202123) %>%
+    rename(voted = V202066)
+
 
 # Rename the columns
 
