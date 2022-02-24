@@ -86,8 +86,8 @@ compute_eligible_voters <- function() {
 }
 
 anes_data$isVoter <- compute_eligible_voters()
-summary(anes_data$isVoter==T)
 ```
+
 
 
 ```{r grouping of republican and democrats}
@@ -126,12 +126,17 @@ anes_data$isDemocrats <- assign_party(R=F)
 ```{r make summary table} 
 summary_table <- anes_data %>% 
   mutate(
+    percentage_voters = case_when(
+      isVoter ~ 'Eligible Voters',
+      !isVoter ~ 'Others',
+    ),
     percentage_partisan = case_when(
       isRepublicans ~ 'Republicans',
       isDemocrats ~ 'Democrats', 
       ((!isRepublicans) & (!isDemocrats)) ~ 'Indepedents')) %$% 
   prop.table(
-    table(percentage_partisan))
+    table(percentage_voters,
+          percentage_partisan))
 
 summary_table
 ```
