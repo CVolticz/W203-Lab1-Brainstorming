@@ -39,7 +39,8 @@ head(anes_timeseries)
 # selecting interesting columns to study
 anes_data <- anes_timeseries[, c('V200001', 'V201018', 'V201024', 
                                  'V202120a', 'V202119', 'V201228', 
-                                 'V201229', 'V201230', 'V202123', 'V202066')]
+                                 'V201229', 'V201230', 'V202123', 
+                                 'V202066', 'V202051')]
 
 # Rename the columns
 anes_data <- anes_data %>%
@@ -52,18 +53,96 @@ anes_data <- anes_data %>%
   rename(strong_party_identification = V201229) %>%
   rename(leaning_party_identification = V201230) %>%
   rename(reason_why_did_not_vote = V202123) %>%
-  rename(voted = V202066)
-
+  rename(voted = V202066) %>%
+  rename(registered_to_vote = V202051)
 
 # Rename the columns
 anes_data
 ```
+```{r assign NAN to dataset}
+# any datapoint that are in the negative either has no answer of is experiencing technical difficulties. 
+# For that We should change that to NAN
+
+for (i in colnames(anes_data)){
+   anes_data[i][anes_data[i] < 0] <- NA
+}
+
+```
+
+```{r voter ins 2020 elections}
+# Voters classification. 
+# 1. Difficulty in Registering for Vote (1)
+# 2. Registered to Vote at current address (1) at different address (2) not registered (3)
+# 2. Voted NO: (1-3) YES:(4)
+
+compute_eligible_voters <- function() {
+  # create several truth statements here
+  hasVoted <- (anes_data$voted==4)
+  hasNotRegistered <- (anes_data$registered_to_vote==3)
+  hasDifficultRegistered <- (anes_data$difficulty_registering==1)
+  
+  testCase <- (hasVoted) | (hasNotRegistered & hasDifficultRegistered)
+  return(testCase)
+}
+
+anes_data$isVoter <- compute_eligible_voters()
+summary(anes_data$isVoter==T)
+```
 
 
+```{r grouping of republican and democrats}
+# assignment of republican and democrats
+# Here partitians are considered as those who identified themselves as strong, weak and leaning toward that party
+## for republicans: (party_identification) V201228 = 2, (strong_party_identification) V201229 = 1,2 (leaning) V201230 = 1
+## for democrats: (party_identification) V201228 = 1, (strong_party_identification)V201229 = 1,2 (leaning)  V201230 = 3
+
+assign_party <- function(R=T){
+  if(R) {
+    isRep <- (anes_data$party_identification == 2)
+    isOther <- ((anes_data$party_identification == 3) | (anes_data$party_identification == 5))
+    isStrong <- (anes_data$strong_party_identification == 1)
+    isWeak <- (anes_data$strong_party_identification == 2)
+    isRepLeaning <- (anes_data$leaning_party_identification == 1)
+
+    testCase <- ((isRep & isStrong) | (isRep & isWeak) | (isOther &  isRepLeaning))
+    return (testCase)
+  }
+  else {
+    isDem <- (anes_data$party_identification == 1)
+    isOther <- ((anes_data$party_identification == 3) | (anes_data$party_identification == 5))
+    isStrong <- (anes_data$strong_party_identification == 1)
+    isWeak <- (anes_data$strong_party_identification == 2)
+    isDemLeaning <- (anes_data$leaning_party_identification == 3)
+    testCase <- ((isDem & isStrong) | (isDem & isWeak) | (isOther &  isDemLeaning))
+    return (testCase)
+  }
+}
+
+anes_data$isRepublicans <- assign_party()
+anes_data$isDemocrats <- assign_party(R=F)
+
+```
+
+```{r make summary table} 
+summary_table <- anes_data %>% 
+  mutate(
+    percentage_partisan = case_when(
+      isRepublicans ~ 'Republicans',
+      isDemocrats ~ 'Democrats', 
+      ((!isRepublicans) & (!isDemocrats)) ~ 'Indepedents')) %$% 
+  prop.table(
+    table(percentage_partisan))
+
+summary_table
+```
 
 
-
-
-
-
+```{r summary-table}
+kable(
+  summary_table,
+  digits = 2,
+  caption = 'Percentage of Voter by Partisan in 2020', 
+  booktabs = TRUE, 
+)
+```
 
