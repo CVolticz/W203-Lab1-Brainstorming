@@ -151,3 +151,11 @@ kable(
 )
 ```
 
+
+```{R}
+?hist
+# make a column for age and plot it
+legislators_current$age <- 2022 - strtoi(substr(legislators_current$birthday, 1, 4))
+hist(legislators_current$age, main = 'Senator Age', breaks=20)
+```
+
