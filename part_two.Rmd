@@ -153,10 +153,26 @@ kable(
 ```
 
 
-```{R}
-?hist
-# make a column for age and plot it
-legislators_current$age <- 2022 - strtoi(substr(legislators_current$birthday, 1, 4))
-hist(legislators_current$age, main = 'Senator Age', breaks=20)
+```{r split the dataset}
+# select only pertient information
+# here we isolate the two sample by party identification and plot the column named difficult to vote in a pie chart
+pert_dataset <- anes_data[,c(5, 12, 13, 14)]
+
+republicans_voters <- pert_dataset %>% 
+  filter(
+    isRepublicans == T & 
+    isVoter == T)  %>% 
+select(difficult_to_vote)
+
+democrats_voters <- pert_dataset %>% 
+  filter(
+    isDemocrats == T & 
+    isVoter == T) %>% 
+select(difficult_to_vote)
+
+
+republicans_voters <- republicans_voters[!is.na(republicans_voters)]
+pie(!is.na(republicans_voters))
+
 ```
 
