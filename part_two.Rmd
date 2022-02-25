@@ -161,7 +161,7 @@ pert_dataset <- anes_data[,c(5, 12, 13, 14)]
 republicans_voters <- pert_dataset %>% 
   filter(
     isRepublicans == T & 
-    isVoter == T)  %>% 
+    isVoter == T )  %>% 
 select(difficult_to_vote)
 
 democrats_voters <- pert_dataset %>% 
@@ -170,9 +170,35 @@ democrats_voters <- pert_dataset %>%
     isVoter == T) %>% 
 select(difficult_to_vote)
 
+democrats_voters %>%
+	group_by(difficult_to_vote)%>%
+	summarize (total = n()) %>%
+  mutate(percent = (total/2906)*100) %>%
+	arrange(desc(percent))
 
-republicans_voters <- republicans_voters[!is.na(republicans_voters)]
-pie(!is.na(republicans_voters))
+republicans_voters %>%
+	group_by(difficult_to_vote)%>%
+	summarize (total = n()) %>%
+  mutate(percent = (total/2576)*100) %>%
+	arrange(desc(percent))
+
+"""
+# create difficulty table
+summary_table <- anes_data %>% 
+  mutate(
+    republicans = case_when(
+      isVoter ~ 'Eligible Voters',
+      !isVoter ~ 'Others',
+    ),
+    percentage_partisan = case_when(
+      isRepublicans ~ 'Republicans',
+      isDemocrats ~ 'Democrats', 
+      ((!isRepublicans) & (!isDemocrats)) ~ 'Indepedents')) %$% 
+  prop.table(
+    table(percentage_voters,
+          percentage_partisan))
+
+summary_table"""
 
 ```
 
