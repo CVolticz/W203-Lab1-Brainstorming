@@ -74,15 +74,22 @@ for (i in colnames(anes_data)){
 # Voters classification. 
 # 1. Difficulty in Registering for Vote (1)
 # 2. Registered to Vote at current address (1) at different address (2) not registered (3)
-# 2. Voted NO: (1-3) YES:(4)
+# 3. Voted NO: (1-3) YES:(4)
+
+# Here we conceptualized voters as people who:
+# 1. has Voted
+# 2. has not Voted and has registed to vote
+# 3. has not registerd and has difficulty in registering to vote
 
 compute_eligible_voters <- function() {
   # create several truth statements here
   hasVoted <- (anes_data$voted==4)
+  hasNotVoted <- (anes_data$voted==1) | (anes_data$voted==2) | (anes_data$voted==3)
+  hasRegistered <- (anes_data$registered_to_vote==1) | (anes_data$registered_to_vote==2)
   hasNotRegistered <- (anes_data$registered_to_vote==3)
   hasDifficultRegistered <- (anes_data$difficulty_registering==1)
   
-  testCase <- (hasVoted) | (hasNotRegistered & hasDifficultRegistered)
+  testCase <- (hasVoted) | (hasNotVoted & hasRegistered) | (hasNotRegistered & hasDifficultRegistered)
   return(testCase)
 }
 
@@ -181,24 +188,6 @@ republicans_voters %>%
 	summarize (total = n()) %>%
   mutate(percent = (total/2576)*100) %>%
 	arrange(desc(percent))
-
-"""
-# create difficulty table
-summary_table <- anes_data %>% 
-  mutate(
-    republicans = case_when(
-      isVoter ~ 'Eligible Voters',
-      !isVoter ~ 'Others',
-    ),
-    percentage_partisan = case_when(
-      isRepublicans ~ 'Republicans',
-      isDemocrats ~ 'Democrats', 
-      ((!isRepublicans) & (!isDemocrats)) ~ 'Indepedents')) %$% 
-  prop.table(
-    table(percentage_voters,
-          percentage_partisan))
-
-summary_table"""
 
 ```
 
