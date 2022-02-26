@@ -8,8 +8,6 @@ output:
     number_sections: true
     toc_depth: 3
 ---
-test change
-
 \newpage
 \setcounter{page}{1}
 
@@ -26,26 +24,36 @@ theme_set(theme_bw())
 
 options(tinytex.verbose = TRUE)
 knitr::opts_chunk$set(echo=FALSE, message=FALSE)
-
 ```
 
-```{r load data}
+```{r load data, include=FALSE}}
 anes_timeseries <- read.csv("datasets/anes_timeseries_2020_csv_20220210.csv")
 nrow_original <- nrow(anes_timeseries)
-head(anes_timeseries)
 ```
 
+```{r creating table of names}
+renamed_table <- data.frame("Code" = c('V200001', 'V202120a', 'V202119', 
+                                 'V201228', 'V201229', 'V201230', 
+                                 'V202066', 'V202051'),
+                  "Name" = c("Survey id", "Difficulty in registering to vote",
+                                       "Difficulty to vote", "Party identification",
+                                       "Strong party identification", "Leaning party identification",
+                                       "Whether or not they voted", "Registered to vote"))
+```
+
+```{r data columns identification}
+kable(
+  renamed_table,
+  caption = 'Data Columns Identification', 
+  booktabs = TRUE, 
+)
+```
 
 ```{r consolidate data}
-# rename(reason_why_did_not_vote = V202123) %>%
-
-
 # selecting interesting columns to study
-anes_data <- anes_timeseries[, c('V200001', 'V201018', 'V201024', 
-                                 'V202120a', 'V202119', 'V201228', 
-                                 'V201229', 'V201230', 'V202123', 
+anes_data <- anes_timeseries[, c('V200001', 'V202120a', 'V202119', 
+                                 'V201228', 'V201229', 'V201230', 
                                  'V202066', 'V202051')]
-
 # Rename the columns
 anes_data <- anes_data %>%
   rename(case_id = V200001) %>%
@@ -56,30 +64,32 @@ anes_data <- anes_data %>%
   rename(leaning_party_identification = V201230) %>%
   rename(voted = V202066) %>%
   rename(registered_to_vote = V202051)
-
-# Rename the columns
-anes_data
 ```
+
 ```{r assign NAN to dataset}
 # any datapoint that are in the negative either has no answer of is experiencing technical difficulties. 
 # For that We should change that to NAN
-
 for (i in colnames(anes_data)){
    anes_data[i][anes_data[i] < 0] <- NA
 }
 
 ```
 
+
+
+
+
+
 ```{r voter ins 2020 elections}
-# Voters classification. 
+# Voters classification. First, picking out the column of interest and the number associated with it 
 # 1. Difficulty in Registering for Vote (1)
 # 2. Registered to Vote at current address (1) at different address (2) not registered (3)
 # 3. Voted NO: (1-3) YES:(4)
 
 # Here we conceptualized voters as people who:
 # 1. has Voted
-# 2. has not Voted and has registed to vote
-# 3. has not registerd and has difficulty in registering to vote
+# 2. has not Voted and has registered to vote
+# 3. has not registered and has experience difficulty in registering 
 
 compute_eligible_voters <- function() {
   # create several truth statements here
@@ -131,6 +141,7 @@ anes_data$isDemocrats <- assign_party(R=F)
 ```
 
 ```{r make summary table} 
+# Making a summary table to display eligible voters
 summary_table <- anes_data %>% 
   mutate(
     percentage_voters = case_when(
@@ -165,7 +176,7 @@ kable(
 # 12: is Voter
 # 13: is Republicans
 # 14: is Democrats
-pert_dataset <- anes_data[,c(5, 12, 13, 14)]
+pert_dataset <- anes_data[,c(3, 9, 10, 11)]
 ```
 
 
@@ -187,7 +198,7 @@ select(difficult_to_vote)
 republicans_voters_nona <- drop_na(republicans_voters)
 democrats_voters_nona <- drop_na(democrats_voters)
 
-# Compute Percentage Scale at each level of vogin
+# Compute Percentage Scale at each level of voting difficulty for democrats
 dem_voters_difficulties <- democrats_voters_nona %>%
 	group_by(difficult_to_vote)%>%
 	summarize (Total = n()) %>%
@@ -196,51 +207,107 @@ dem_voters_difficulties <- democrats_voters_nona %>%
   rename( "Voting Difficulty Scale" = difficult_to_vote)
 
 
+# Compute Percentage Scale at each level of voting difficulty for republicans
 rep_voters_difficulties <- republicans_voters_nona %>%
 	group_by(difficult_to_vote)%>%
 	summarize (Total = n()) %>%
   mutate(Percent = (Total/2576)*100) %>%
 	arrange(desc(Percent)) %>%
   rename( "Voting Difficulty Scale" = difficult_to_vote)
-
-
 ```
 
 ```{r Summary Table for Voter Difficulties for Democrats}
 kable(
   dem_voters_difficulties,
   digits = 2,
-  caption = 'Percentage of Voter Experiencing Difficulties', 
+  caption = 'Percentage of Democratics Voter Experiencing Difficulties', 
   booktabs = TRUE, 
 )
 ```
-```{r Summary Table for Voter Difficulties for Republicans}
+```{r Summary Table for Voter Difficulties for Republicans, include=FALSE}
 kable(
   rep_voters_difficulties,
   digits = 2,
-  caption = 'Percentage of Voter Experiencing Difficulties', 
+  caption = 'Percentage of Republicans Voter Experiencing Difficulties', 
   booktabs = TRUE, 
 )
 ```
 
+```{r voter-difficulties}
+#knitr::kable(list(rep_voters_difficulties, dem_voters_difficulties), digits = 2,
+#               caption = 'Percentage of Republicans (Left) and Democrats (Right) Voter Experiencing #Difficulties', 
+#)
+# set the plotting area into a 1*2 array
+label <- c('Not difficult at all','A little difficult','Moderately difficult',
+            'Very difficult','Extremely difficult')
 
-```{r}
-# 1. Ordinal Scale
-# 1 = Not difficult at all 
-# 2 = A little difficult 
-# 3 = Moderately difficult 
-# 4 = Very difficult 
-# 5 = Extremely difficult
+par(mfrow=c(1,2))  
 
-summary(democrats_voters)
-summary(republicans_voters)
+# Draw the two pie chart using above datasets
+pie(rep_voters_difficulties$Percent, labels = paste0(rep_voters_difficulties$Total, "%"), main="Republican Voters")
+pie(dem_voters_difficulties$Percent, labels = paste0(dem_voters_difficulties$Total, "%"), main="Democrats Voters")
+
+
+legend("bottom", legend = label)
 ```
 
-```{r}
-democrats_voters_nona <- drop_na(democrats_voters)
-summary(democrats_voters_nona)
-```
+# Introduction
+According to the U.S. Constitution, voting is a right. However, there have been recent allegations of voter irregularities and suppression during the 2020 presidential elections that made voting difficult for some Americans. The BBC report done in Georgia in October 2020\footnote{Levinson-King, R. (2020, October 20). US election 2020: Why it can be hard to vote in the US. BBC News. Retrieved February 26, 2022, from https://www.bbc.com/news/election-us-2020-54240651}, highlighted that restrictive voting laws and limited access to polling stations have led to some voters experiencing difficulty such as long wait times. During the 2020 presidential election, there was a historic number of popular votes (the total number of votes by citizens) with 155 million Americans or 66.8% of the citizens 18 years and older voting \footnote{Bureau, U. S. C. (2021, October 8). 2020 presidential election voting and registration tables now available. Census.gov. Retrieved February 26, 2022}. Of this 66.8%, Biden received 81.2 million votes while Trump received 74.2 million votes. In spite of the historical voting turnout, still 33.2% of the voting population did not vote. 
 
-```{r}
+For that reason it is worthwhile to investigate the question:
+\begin{quote}
+  \textit{Did Democratic voters or Republican voters experience more difficulty in voting in the 2020 election?}
+\end{quote}
+
+An answer to this question could provide insights into whether or not difficulties in voting are partisan or bipartisan issues. It could also help shed some light on what is preventing voters from voting. Addressing these issues could potentially increase voter turnout in future elections.
+
+
+# Conceptualization and Operationalization
+In order to tackle the research question, we first need to clarify a few questions:
+1) Who or what is a voter?
+2) Who is a “Republican” and who is a “Democrat”?
+3) What does it mean to experience difficulty in voting? 
+
+In this study, we conceptualize voters as American citizens who are eligible to vote or have voted in the 2020 election. Second, we define Republicans as individuals who identify themselves as strong, weak or leaning republicans, likewise with Democrats. Finally, we define difficulty in voting as any challenge that hinders a voter ability to vote for the 2020 presidential election. 
+
+Our analysis leverage data from the 2020 American National Election Studies (ANES)\footnote{Home - anes: American National Election Studies. ANES | American National Election Studies. (2022, February 10). Retrieved February 26, 2022, from https://electionstudies.org/}. We planned to use some of the observational data collected as follows: 
+* First, to create a measurement for voters, we will use the data pertaining to individuals who have registered to vote and post election data on those that voted. We would merge these two columns with voters who have experienced difficulties in registering to vote. Treating the data this way, we would capture those that registered to vote or those that have experienced difficulties in voting. 
+
+* Second, to classify partisanship and based on a study done by Petrocik 2009, we will collect data on those who identified themselves as having strong partisanship, weak partisanship, or leaning toward a particular party. Here we will be grouping weak partisanship and those who lean toward a particular party in the same group. This is the best method for treating this part of the data because learners are partisans. Characterizing them as independents underestimates the partisanship of Americans and leads to inaccurate estimates of party effects and the responsiveness of the electorate to short-term electoral forces (Petrocik, 2009).
+
+* Finally, to identify those who experience difficulties in voting, we will collect data based on a survey report of individuals experiencing difficulties to vote on a Likert scale from 1 to 5 with 1 being not difficult at all and 5 being extremely difficult. This information would enable us to measure the level of difficulties among individuals of each party.
+
+
+Data wrangling
+First, we isolated the following columns from the main dataset and renamed them as seen in Table \@ref(tab:data columns identification)
+
+Second, we filtered out any data points that had negative values and labeled them as NA because according to the ANES dataset dictionary, negative integers mean that there was either no answer for this individual or the surveyor had experienced some form of technical difficulties when interacting with this individual. 
+
+According to our conceptualization of voters, we identified three columns that contain information on voters. These columns are people who experienced difficulty in voting, people who registered to vote, and people who have voted. Using these columns, we created the following conditional statements: Voters are people who have voted or have not voted and have registered or have not registered but have experience difficulty in registering. We stored this column as a Boolean statement named isVoter.
+
+# Hypothesis testing
+To beging hypothesis testing, we formualted a null hypothesis and an alternate hypothesis. We decided to go with the alternative hypothesis that Democratic voters experience more difficulty than Republican voters based on our analysis of the data as outlined in the following two tables \@ref(tab:summary-table). Our calculations show that when we normalize the total number of voters per party, the percentage of democrats voters who experienced difficulty is higher than that of republicans voters. 
+
+Null Hypothesis, ($H_o$):
+The probability that a Republican voter’s level of difficulty is higher than that of a Democratic voter is the same as the probability that a Democratic voter’s level of difficulty is higher than that of a Republican voter.
+$P(R\ level\ of\ difficulty\ >\ D\ level\ of\ difficulty) = P(R\ level\ of\ difficulty\ < D\ level\ of\ difficulty)$
+
+Alternative Hypothesis, ($H_a$):
+The probability that a Democratic voter’s level of difficulty is higher than that of a Republican voter.
+
+$P(R\ level\ of\ difficulty < D\ level\ of\ difficulty)$
+
+To test our hypothesis, we used the Wilcoxon Rank Sum Test (Hypothesis of Comparison). For the test to produce reliable results, the following assumptions must hold:
+1. Ordinal Scale:
+- The collected data is based on a survey report of individuals experiencing difficulties to vote on a Likert scale from 1 to 5. At each rating, there is no continuous relationship between it and the next. This means that a rating of experiencing no difficulty at all is distinct from a rating of experiencing the most difficulty. Therefore, the condition of being ordinal scale is met
+
+2. IID: Each $X_i$ is drawn from the same distribution, each $Y_i$ is drawn from the same distribution, and all $X_i$ and $Y_i$ are mutually independent.
+- Let X be the Random variable for Republicans voters and let Y be the Random Variable for Democrats voters. Here, each draw of either  $X_i$ or $Y_i$ is drawn from the same pool of people who are identified as voters in our dataset. So they all have the same underlying distribution. For each draw of $X_i$, there is no information on the next draw of $X_i$, the same case goes for each draw of $Y_i$. Therefore, the two samples are considered Independent and Identically Distributed (IID).
+
+# Test Results
+```{r Wilcoxon Rank Sum Test, echo=TRUE}
 wilcox.test(democrats_voters$difficult_to_vote, republicans_voters$difficult_to_vote, paired = FALSE, alternative = "greater")
 ```
+For our Wilcoxon rank sum test, we set X parameter to Democratic voters, the Y parameter to Republican Voters, and the alternative hypothesis parameter to greater, indicating that we want to test the alternative hypothesis that Democratic voters experienced a greater level of difficulty that Republican voters. 
+
+The Wilcoxon rank sum test result showed significant evidence that tDemocratic voters had a higher probability of experiencing difficulty in voting than Republican voters in the 2020 presidential election (W = 3840387, p = 0.000855). With our p-value being less than 0.05, we can reject the null hypothesis. 
