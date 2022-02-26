@@ -10,25 +10,25 @@ output:
 ---
 # Part 1: Foundational Exercises
 ## Professional Magic
-Based on the given, we know that the two coins are represented by Bernoulli Random Variables. To determine whether or not it is indeed magic, we designed a test to flip the two coins three times and record the test statistics of the number of heads shown. In the case of a fair coin toss, our Null Hypothesis (Ho) is p = 1/2. Since we are flipping 2 coins three times, we would have at most 6 heads shown. So we plan to reject our Null Hypothesis if our test statistics is 0 or 6.
-a. Here we want to calculate the type 1 error rate. Type 1 error rate is refers to as the probability of rejecting the Null Hypothesis (Ho) given that the Null Hypothesis is True.
+Based on the information provided, we know that the two coins are represented by Bernoulli Random Variables. To determine whether or not it is indeed magic, we designed a test to flip the two coins three times and record the test statistics of the number of heads shown. In the case of a fair coin toss, our Null Hypothesis (Ho) is p = 1/2. Since we are flipping 2 coins three times, we would have at most 6 heads shown. So we plan to reject our Null Hypothesis if our test statistics is 0 or 6.
+a. Here we want to calculate the type 1 error rate. Type 1 error rate refers to the probability of rejecting the Null Hypothesis (Ho) given the Null Hypothesis is True.
 $$
   P(Rejecting\ H_o\ |\ H_o)
 $$
-Let the test statistics be T = (X_1 + Y_1) + (X_2 + Y_2) + (X_3 + Y_3), X_i and Y_i takes on values in {0, 1}
+Let the test statistics be T = (X_1 + Y_1) + (X_2 + Y_2) + (X_3 + Y_3), X_i and Y_i takes on values {0, 1}.
 $$
   Rejection\ Region: T = [0, 6]
 $$
 $$
-  P(Rejecting\ H_o\ |\ H_o) = P[(T = 0)\ U\ (T = 6)\ when\ T\ is \ Bernouli(p/2)]
+  P(Rejecting\ H_o\ |\ H_o) = P[(T = 0)\ U\ (T = 6)\ when\ T\ is \ Bernoulli(p/2)]
   
 $$
-Since each X, Y coin toss is independence:
+Since each X, Y coin toss is independent:
 $$
   P(Rejecting\ H_o\ |\ H_o) = P[(T = 0)] + P[(T = 6)]\ Independence
   
 $$
-Expanding the probability, and subsitute p=1/2 into the system since we are given Ho: p=1/2. We apply multiplication for 3 coin tosses here since each (X, Y) pairs are IID, and we have three pairs
+Expanding the probability, and substituting p=1/2 into the system since we are given Ho: p=1/2, we apply multiplication for 3 coin tosses here since each (X, Y) pairs are IID, and we have three pairs.
 $$
   P[(T = 0)] = [X1 = 0, Y1= 0, X2=0, Y2=0, X3=0, Y3=0] = (p/2)^3 = (1/4)^3 = (1/4)^3 = 1/64
 $$
@@ -38,32 +38,32 @@ $$
 $$
   P(Rejecting\ H_o\ |\ H_o) = 1/64 + 1/64 = 1/32 \approx 0.031
 $$
-b. Here we want to calculate the statistical power of our test for the alternate hypothesis. Statistical Power is related to Type 2 error rate and is refers to as the probability of supporting the Alternate Hypothesis (Ha) given that the Alternate Hypothesis is True. and the statistical power is just 1 - type 2 error rate
+b. Here we want to calculate the statistical power of our test for the alternative hypothesis. Statistical Power is related to Type 2 error rate and refers to the probability of supporting the Alternative Hypothesis (Ha) given that the Alternative Hypothesis is True, and the statistical power equals 1 - type 2 error rate.
 $$
   P(Supporting\ H_a\ |\ H_a)
 $$
-We are given that Ha: p=3/4, and that our rejection region is [0, 6]
+We are given that Ha: p=3/4, and that our rejection region is [0, 6]:
 $$
   P(# of heads in the rejection region | Ha) = P(# of  heads in [0, 6] | Ha)
 $$
-Since each X, Y coin toss is independence:
+Since each X, Y coin toss is independent:
 $$
   P(Supporting\ H_a\ |\ H_a) = P[(T = 0)] + P[(T = 6)]\ Independence
 $$
-Expanding the probability, and subsitute p=3/4 into the system since we are given Ha: p=3/4. We apply multiplication for 3 coin tosses here since each (X, Y) pairs are IID, and we have three pairs
+Expanding the probability, and substituting p=3/4 into the system since we are given Ha: p=3/4, we apply multiplication for 3 coin tosses here since each (X, Y) pairs are IID, and we have three pairs:
 $$
   P[(T = 0)] = [X1 = 0, Y1= 0, X2=0, Y2=0, X3=0, Y3=0] = (p/2)^3 = (3/8)^3 = 27/512
 $$
 $$
   P[(T = 6)] = [X1 = 1, Y1= 1, X2=1, Y2=1, X3=1, Y3=1] = (p/2)^3 = (3/8)^3  = 27/512
 $$
-So the statistical power, or tje probability of not making a type 2 error is computed as follow
+Thus, the statistical power, or the probability of not making a type 2 error is computed as follows:
 $$
   Statistical Power = 27/512 + 27/512 = 27/256 \approx 0.105
 $$
 \newpage
 ## Wrong Test, Right Data
-Let X be the Random Variable for how much customers like the regular website. Let Y be the Random Variable for how much customers like the mobile website. The scale of measurement is on the 5 points Likert scales. Given that Likert scales is an ordinal scale, if we are using the paried t-test, we would violate the assumption that the t-test uses a metric scale. To calculate t-test statistics in the paired t-test, we know that we need to calculate an expected value and the sample variation for both random variable X, Y. For that, the scale has to be continuous. The Likert scale, being an ordinal scale, has no objective variation between one value to another. This would give you a larger test statistics t, making our test sample to fall into the rejection region, which would increase the type 1 error rate. To correct for this, we suggest Wilcoxon Sign-Rank Test because the two samples are dependent.
+Let X be the Random Variable describing how much customers like the regular website. Let Y be the Random Variable showing how much customers like the mobile website. The scale of measurement is on the 5 points Likert scales. Given that the Likert scale is an ordinal scale, if we are using the paired t-test, we would violate the assumption that the t-test uses a metric scale. To calculate t-test statistics in the paired t-test, we know that we need to calculate an expected value and the sample variation for both random variable X, Y. For that, the scale has to be continuous. The Likert scale, being an ordinal scale, has no objective variation between one value to another. We believe this would cause one to compute a bias test statistics, likely larger, making our test sample to fall into the rejection region, which would increase the type 1 error rate. To correct for this, we suggest Wilcoxon Sign-Rank Test because the two samples are dependent.
 \newpage
 ## Test Assumptions
 ### World Happiness
@@ -80,34 +80,41 @@ summary(happiness_dataset$Life.Ladder)
 ```
 Even though the life ladder scale is ordinal in nature, the data presented could be considered metric as it includes decimal averages for every individual in a country.
 For this reason, we believe that the assumption that we are using metric data is met.
+
 2.  IID data.
-Sample 1: Happiness in countries with high GDP per capita
-Sample 2: Happiness levels in countries with low GDP per capita
-Given the two samples, we believe that happiness level of one individual would not provide information about the happiness of another individual, making us conclude that these values are independent. 
+Sample 1: Happiness in countries with high GDP per capita.
+Sample 2: Happiness levels in countries with low GDP per capita.
+Given the two samples, we believe that the happiness level of one individual would not provide information about the happiness of another individual, making us conclude that these values are independent. 
 Provided that each individual's happiness level is derived from the same scale, we agreed that the values of the samples can also be considered identically distributed.
 For these two reasons, we believe the assumptions of IID are met.
-3.  No major deviations from normality, considering the sample size.
+
+3.  Considering the sample size, we agree that there would be no major deviations from normality.
+
 ```{R}
 summary(happiness_dataset$Log.GDP.per.capita)
 happiness_dataset$is_high_gdp<-happiness_dataset$Log.GDP.per.capita>9.584
 sum(!is.na(happiness_dataset$Life.Ladder[happiness_dataset$is_high_gdp==T]))
 sum(!is.na(happiness_dataset$Life.Ladder[happiness_dataset$is_high_gdp==F]))
 ```
-Assuming that the samples are splitted based on the GDP per capita mean value of 9.584, we found that both samples sizes exceed 30, so the Central Limit Theorem approximates a normal distribution.
-For this reason, we conclude that there are no major deviations from normality, considering the sample size.
+Assuming that the samples are split based on the GDP per capita mean value of 9.584, we found that both samples exceed size of 30, so the Central Limit Theorem is met, expecting approximation of a normal distribution.
+For this reason, we conclude that there are no major deviations from normality.
 ### Legislators
 ```{R}
 legislators_current <- read.csv('datasets/legislators-current.csv')
 ```
 Assumptions for a Wilcoxon rank-sum test (Hypothesis of Comparison):
-1.  Ordinal scale.
+
+#David Corrales - We need to fix this (it is continuous not ordinal)
+
+1.  Our data is an ordinal scale.
 ```{R}
 ?hist
 # make a column for age and plot it
 legislators_current$age <- 2022 - strtoi(substr(legislators_current$birthday, 1, 4))
 hist(legislators_current$age, main = 'Senator Age', breaks=20)
 ```
-The senator age is calculated, using the current year 2022 minus the birthyear, as a discrete value from 0 to 100. There is no continuous relationship between two age interval (ie. 89, 90 are two distinct age). For that reason, the assumption that the age is on a ordinal scale is met.
+The senator age is calculated using the current year 2022 minus the birth year, as a discrete value from 0 to 100. There is no continuous relationship between two age interval (ie. 89, 90 are two distinct ages). For that reason, we believe the assumption that the age is on an ordinal scale is met.
+
 2.  IID
 The age of the senator is independent because a birth year of one senator does not provide any information to determine the birth year of another senator. The senator age is also identically distributed because it is derived from the same birth year convention on a regular calendar scale. For those reasons, the IID assumption is met!
 ### Wine and health
@@ -120,14 +127,16 @@ library(wooldridge)
 wine
 ```
 The wine dataset contains observations of variables related to wine consumption for 21 countries. We would like to use this data to test whether countries have more deaths from heart disease or from liver disease.
+
 Assumptions for a Wilcoxon Signed-Rank Test:
-1) Metric scale.
+
+1) The data is a metric scale.
   - In particular, X and Y are both measured on the same metric scale.
 ```{r}
 summary(wine$heart)
 summary(wine$liver)
 ```
-By viewing the format of the wine dataset, the columns heart and liver are denoted as heart disease deaths per 100,000 and liver disease deaths per 100,000, respectively. Since the two columns both measure death per 100,000 individuals, it is measuring a continous average number of death and is measuring from the same scale. Therefore the assumption that both samples are metric is met.
+By viewing the format of the wine dataset, the columns heart and liver are denoted as heart disease deaths per 100,000 and liver disease deaths per 100,000, respectively. Since the two columns both measure death per 100,000 individuals, it is measuring a continuous average number of death and is measuring from the same scale. Therefore the assumption that both samples are metric is met.
 ```{r}
 hist(wine$liver)
 ```
@@ -137,7 +146,8 @@ hist(wine$heart)
 2) IID data.
 
   - In particular, each pair $(X_i,Y_i)$ is drawn from the same distribution, independently of all other pairs.
-Let X_i be the number of deaths caused by heart disease in country i and Y_i be the number of deaths caused by liver disease in the same country i, such that, both, X_i and Y_i are pairs of the same total distribution of death of the same country, making the pair naturally dependent by virtue of being part of the same country, and independent from other pairs, belonging to other countries. In this way, we find that we can generate pairs X_i,Y_i from the same distribution and independently of all other pairs, thus, meeting this assumption as well.
+  
+Let X_i be the number of deaths caused by heart disease in country i and Y_i be the number of deaths caused by liver disease in the same country i, such that, both, X_i and Y_i are pairs of the same total distribution of death of the same country, making the pair naturally dependent by virtue of being part of the same country, and independent from other pairs, belonging to other countries. In this way, we find that we can generate pairs X_i,Y_i from the same distribution and independently of other pairs, thus, meeting this assumption as well.
 
 3) The distribution of the difference $X - Y$ is symmetric around some mean $\mu$
 ```{r}
@@ -145,7 +155,7 @@ wine$diff <- wine$heart-wine$liver
 sum(!is.na(wine$diff))
 hist(wine$heart-wine$liver, main='Differences between Heart/Liver Death', breaks=5)
 ```
-Here the number of observations for the differences between death by heart disease and death by liver disease is calculated to be n=21. This put it under n>30 boundary for the Central Limit Theorem. Additionally, when plotted in a histogram with number of bins=5, we see that the distribution does not really show a normal distribution. For those reason, the assumption that the distribution of the difference $X - Y$ is symmetric around some mean $\mu$ is not met here.
+Here the number of observations for the differences between death by heart disease and death by liver disease is calculated to be n=21. This number is not large enough to meet the 30 minimum as ascribed by the the Central Limit Theorem. Additionally, when plotted in a histogram, we see that the distribution does not show a normal distribution either. For those reasons, we agree that the assumption that the distribution of the difference $X - Y$ is symmetric around some mean $\mu$ is not met.
 ### Attitudes toward the religious
 ```{r}
 GSS_religion <- read.csv('datasets/GSS_religion.csv')
@@ -153,7 +163,11 @@ GSS_religion <- read.csv('datasets/GSS_religion.csv')
 Assumptions for a Paired t-Test:
 1) Metric scale.
   - In particular, the t-test is not valid for variables which only have an ordinal structure.
-To assess the sample as being a metric scale, we need to see whether or not the data are presented with a degree of difference between categories. From the description of the feeling thermometer, a rating from 0 to 100, a rating between 50 degrees and 100 degrees mean that you feel favorable and warm toward the group and a rating between 0 degrees and 50 degrees means that you don't feel favorable toward the group. Theoretically, if we look at the interval [49,51] we can see that any values between 50 to 51 degrees fall into the feeling favorable group while any values between 49 to 50 fall into the feeling unfavorable group. Using that logic, we can see that there is a degree of difference between categories and therefore the assumption of metric scale is met.
+  
+# David Corrales - I agree with the fact that this is a metric scale but the way we explain this could be improved. Let's revisit this paragraph:
+  
+To assess if the sample is on a metric scale, we evaluated if the data is presented with a degree of difference between categories. From the description of the feeling thermometer (a 0-100 rating), a rating between 50 degrees and 100 degrees means that one feels favorable and warm toward the group and a rating between 0 degrees and 50 degrees means that one does not feel favorable toward the group. Theoretically, if one looks at the interval [49,51] one can see that any values between 50 to 51 degrees fall into the favorable group while any values between 49 to 50 fall into the unfavorable group. Using this logic, we find that there is a degree of difference between categories and therefore the assumption of metric scale is met.
+
 2) IID data.
  - In particular, each pair of measurements $(X_i, Y_i)$ is drawn from the same distribution, independently of all other pairs.
 ```{r}
@@ -161,7 +175,7 @@ summary(GSS_religion$prottemp)
 
 summary(GSS_religion$cathtemp)
 ```
-The description of the GSS questions suggested that the feeling thermometer is a rating from 0 to 100. The rating is obtain by asking the participant to give a rating to name. Keeping this in mind when viewing the summary of the two samples in this dataset, prottemp and cathtemp, we see that they both has minimum value of 0 and maximum value of 100. Additionally, the inner quartile range, computed by taking the difference between the 3rd Quartile and the 1st Quartile, is equal to 35 for both samples. Assessing from this angle, each of the two sample pair (X_i, Y_i) is drawn from the same distribution ranging from a scale of 0 to 100. Therefore they are identically distributed. In term of independent, because the sample pair (X_i, Y_i), or an individual rating on a protestant group and catholic group, provides no information on another user rating for the two groups. It is safe to say that each sample pair is independent. For these reason, we believe that the assumption of IID data is met.
+The description of the GSS questions suggested that the feeling thermometer is a rating from 0 to 100. The rating is obtain by asking the participant to give a rating. Keeping this in mind when viewing the summary of the two samples in this dataset, prottemp and cathtemp, we see that both have a minimum value of 0 and a maximum value of 100. Additionally, the inner quartile range, computed by taking the difference between the 3rd quartile and the 1st quartile, is equal to 35 for both samples. From this standpoint, each sample pair (X_i, Y_i) is drawn from the same distribution ranging from a scale of 0 to 100. Therefore they are identically distributed. In terms of independence, because a given sample pair (X_i, Y_i) is an individual's rating on a protestant group and catholic group, it provides no information on another user rating for the two groups, we conclude that each sample pair is independent. For these reason, we believe that the assumption of IID data is met.
 
 
 #put in a box plot
@@ -177,4 +191,4 @@ sum(!is.na(GSS_religion$diff))
 ```{r}
 hist(GSS_religion$diff, main='Differences between Protemp and Cathtemp', breaks=10)
 ```
-To assess whether or not the difference between the two measurements has no major deviation from normality, we first need to compute the differences between the two samples and count the number of non-nan values in the resulted differences column. Here we see that the sample size is n=802, which exceed a lower bound of n=30. For that reason the Central Limit Theorem approximates a normal distribution. Viewing the histogram with number of bins(breaks) = 10, we see that the sample is relatively distributed with center at approximately 0. For these reasons, the assumption of no deviation from normality is met.
+To assess if the difference between the two measurements has no major deviation from normality, we first need to compute the differences between the two samples and count the number of non-NAN values in a results column. Here we see that the sample size is n=802, which exceeds a minimum bound of n=30. For this reason, we agree that the Central Limit Theorem assumption is met, approximating a normal distribution. Viewing the histogram with number of bins(breaks) = 10, we also see that the sample is relatively distributed with center at approximately 0. For these reasons, the assumption of no deviation from normality is met.
