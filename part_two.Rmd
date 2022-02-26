@@ -14,8 +14,8 @@ test change
 \setcounter{page}{1}
 
 ```{r load packages and set options, include=FALSE}
-install.packages('patchwork')
-install.packages('moments')
+#install.packages('patchwork')
+#install.packages('moments')
 library(tidyverse) 
 library(magrittr)
 library(knitr)
@@ -37,6 +37,9 @@ head(anes_timeseries)
 
 
 ```{r consolidate data}
+# rename(reason_why_did_not_vote = V202123) %>%
+
+
 # selecting interesting columns to study
 anes_data <- anes_timeseries[, c('V200001', 'V201018', 'V201024', 
                                  'V202120a', 'V202119', 'V201228', 
@@ -46,14 +49,11 @@ anes_data <- anes_timeseries[, c('V200001', 'V201018', 'V201024',
 # Rename the columns
 anes_data <- anes_data %>%
   rename(case_id = V200001) %>%
-  rename(registed_party = V201018) %>%
-  rename(manner_of_vote = V201024) %>%
   rename(difficulty_registering = V202120a) %>%
   rename(difficult_to_vote = V202119) %>%
   rename(party_identification = V201228) %>%
   rename(strong_party_identification = V201229) %>%
   rename(leaning_party_identification = V201230) %>%
-  rename(reason_why_did_not_vote = V202123) %>%
   rename(voted = V202066) %>%
   rename(registered_to_vote = V202051)
 
@@ -74,15 +74,22 @@ for (i in colnames(anes_data)){
 # Voters classification. 
 # 1. Difficulty in Registering for Vote (1)
 # 2. Registered to Vote at current address (1) at different address (2) not registered (3)
-# 2. Voted NO: (1-3) YES:(4)
+# 3. Voted NO: (1-3) YES:(4)
+
+# Here we conceptualized voters as people who:
+# 1. has Voted
+# 2. has not Voted and has registed to vote
+# 3. has not registerd and has difficulty in registering to vote
 
 compute_eligible_voters <- function() {
   # create several truth statements here
   hasVoted <- (anes_data$voted==4)
+  hasNotVoted <- (anes_data$voted==1) | (anes_data$voted==2) | (anes_data$voted==3)
+  hasRegistered <- (anes_data$registered_to_vote==1) | (anes_data$registered_to_vote==2)
   hasNotRegistered <- (anes_data$registered_to_vote==3)
   hasDifficultRegistered <- (anes_data$difficulty_registering==1)
   
-  testCase <- (hasVoted) | (hasNotRegistered & hasDifficultRegistered)
+  testCase <- (hasVoted) | (hasNotVoted & hasRegistered) | (hasNotRegistered & hasDifficultRegistered)
   return(testCase)
 }
 
@@ -98,21 +105,20 @@ anes_data$isVoter <- compute_eligible_voters()
 ## for democrats: (party_identification) V201228 = 1, (strong_party_identification)V201229 = 1,2 (leaning)  V201230 = 3
 
 assign_party <- function(R=T){
+  # statements that are accessible by both parties
+  isOther <- ((anes_data$party_identification == 3) | (anes_data$party_identification == 5))
+  isStrong <- (anes_data$strong_party_identification == 1)
+  isWeak <- (anes_data$strong_party_identification == 2)
+  
+  # parties specific statement
   if(R) {
     isRep <- (anes_data$party_identification == 2)
-    isOther <- ((anes_data$party_identification == 3) | (anes_data$party_identification == 5))
-    isStrong <- (anes_data$strong_party_identification == 1)
-    isWeak <- (anes_data$strong_party_identification == 2)
     isRepLeaning <- (anes_data$leaning_party_identification == 1)
-
     testCase <- ((isRep & isStrong) | (isRep & isWeak) | (isOther &  isRepLeaning))
     return (testCase)
   }
   else {
     isDem <- (anes_data$party_identification == 1)
-    isOther <- ((anes_data$party_identification == 3) | (anes_data$party_identification == 5))
-    isStrong <- (anes_data$strong_party_identification == 1)
-    isWeak <- (anes_data$strong_party_identification == 2)
     isDemLeaning <- (anes_data$leaning_party_identification == 3)
     testCase <- ((isDem & isStrong) | (isDem & isWeak) | (isOther &  isDemLeaning))
     return (testCase)
@@ -152,3 +158,89 @@ kable(
 )
 ```
 
+
+```{r isolate column of interest}
+# select only pertient information
+# 5: difficulty to vote
+# 12: is Voter
+# 13: is Republicans
+# 14: is Democrats
+pert_dataset <- anes_data[,c(5, 12, 13, 14)]
+```
+
+
+```{r split the dataset}
+
+republicans_voters <- pert_dataset %>% 
+  filter(
+    isRepublicans == T & 
+    isVoter == T )  %>% 
+select(difficult_to_vote)
+
+democrats_voters <- pert_dataset %>% 
+  filter(
+    isDemocrats == T & 
+    isVoter == T) %>% 
+select(difficult_to_vote)
+
+# Drop NAN for our dataset
+republicans_voters_nona <- drop_na(republicans_voters)
+democrats_voters_nona <- drop_na(democrats_voters)
+
+# Compute Percentage Scale at each level of vogin
+dem_voters_difficulties <- democrats_voters_nona %>%
+	group_by(difficult_to_vote)%>%
+	summarize (Total = n()) %>%
+  mutate(Percent = (Total/2905)*100) %>%
+	arrange(desc(Percent)) %>%
+  rename( "Voting Difficulty Scale" = difficult_to_vote)
+
+
+rep_voters_difficulties <- republicans_voters_nona %>%
+	group_by(difficult_to_vote)%>%
+	summarize (Total = n()) %>%
+  mutate(Percent = (Total/2576)*100) %>%
+	arrange(desc(Percent)) %>%
+  rename( "Voting Difficulty Scale" = difficult_to_vote)
+
+
+```
+
+```{r Summary Table for Voter Difficulties for Democrats}
+kable(
+  dem_voters_difficulties,
+  digits = 2,
+  caption = 'Percentage of Voter Experiencing Difficulties', 
+  booktabs = TRUE, 
+)
+```
+```{r Summary Table for Voter Difficulties for Republicans}
+kable(
+  rep_voters_difficulties,
+  digits = 2,
+  caption = 'Percentage of Voter Experiencing Difficulties', 
+  booktabs = TRUE, 
+)
+```
+
+
+```{r}
+# 1. Ordinal Scale
+# 1 = Not difficult at all 
+# 2 = A little difficult 
+# 3 = Moderately difficult 
+# 4 = Very difficult 
+# 5 = Extremely difficult
+
+summary(democrats_voters)
+summary(republicans_voters)
+```
+
+```{r}
+democrats_voters_nona <- drop_na(democrats_voters)
+summary(democrats_voters_nona)
+```
+
+```{r}
+wilcox.test(democrats_voters$difficult_to_vote, republicans_voters$difficult_to_vote, paired = FALSE, alternative = "greater")
+```

@@ -117,6 +117,8 @@ The senator age is calculated using the current year 2022 minus the birth year, 
 
 2.  IID
 The age of the senator is independent because a birth year of one senator does not provide any information to determine the birth year of another senator. The senator age is also identically distributed because it is derived from the same birth year convention on a regular calendar scale. For those reasons, the IID assumption is met!
+
+
 ### Wine and health
 ```{r}
 # Installing pre-req pacakges
