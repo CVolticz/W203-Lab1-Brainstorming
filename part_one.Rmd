@@ -71,12 +71,14 @@ Let X be the Random Variable describing how much customers like the regular webs
 \newpage
 ## Test Assumptions
 ### World Happiness
-You would like to know whether people in countries with high GDP per capita (higher than the mean) are more happy or less happy than people in countries with low GDP (lower than the mean).
-List all assumptions for a two-sample t-test. Then evaluate each assumption, presenting evidence based on your background knowledge, visualizations, and numerical summaries.
-```{r}
+```{r, include=FALSE}
 # load the happiness dataset
 happiness_dataset <- read.csv('datasets/happiness_WHR.csv')
+happiness_dataset$is_high_gdp<-happiness_dataset$Log.GDP.per.capita>9.584
 ```
+You would like to know whether people in countries with high GDP per capita (higher than the mean) are more happy or less happy than people in countries with low GDP (lower than the mean).
+List all assumptions for a two-sample t-test. Then evaluate each assumption, presenting evidence based on your background knowledge, visualizations, and numerical summaries.
+
 Assumptions for a two-sample t-test:
 1.  Metric scale.
 ```{r}
@@ -95,27 +97,26 @@ For these two reasons, we believe the assumptions of IID are met.
 3.  Considering the sample size, we agree that there would be no major deviations from normality.
 
 ```{R}
-summary(happiness_dataset$Log.GDP.per.capita)
-happiness_dataset$is_high_gdp<-happiness_dataset$Log.GDP.per.capita>9.584
 sum(!is.na(happiness_dataset$Life.Ladder[happiness_dataset$is_high_gdp==T]))
 sum(!is.na(happiness_dataset$Life.Ladder[happiness_dataset$is_high_gdp==F]))
 ```
+
 Assuming that the samples are split based on the GDP per capita mean value of 9.584, we found that both samples exceed size of 30, so the Central Limit Theorem is met, expecting approximation of a normal distribution.
 For this reason, we conclude that there are no major deviations from normality.
 
 
 ### Legislators
 
-```{R}
+```{R, include=FALSE}
 legislators_current <- read.csv('datasets/legislators-current.csv')
+legislators_current$age <- 2022 - strtoi(substr(legislators_current$birthday, 1, 4))
 ```
 Assumptions for a Wilcoxon rank-sum test (Hypothesis of Comparison):
 
 1.  Our data is an ordinal scale:
 The original data was given as date of birth. To make the sample usable, the senator age is calculated using the current year 2022 minus the birth year, as a discrete value from 0 to 100. There is no continuous relationship between two age interval (ie. 89, 90 are two distinct ages). For that reason, we believe the assumption that the age is on an ordinal scale is met.
-```{3}
+```{r}
 # make a column for age and plot it
-legislators_current$age <- 2022 - strtoi(substr(legislators_current$birthday, 1, 4))
 hist(legislators_current$age, main = 'Senator Age', breaks=20)
 ```
 
@@ -125,11 +126,13 @@ The age of the senator is independent because a birth year of one senator does n
 
 ### Wine and health
 
-```{r}
+```{r, include=FALSE}
 # Installing pre-req pacakges
 # load the wine dataset
 install.packages("wooldridge") 
 library(wooldridge) 
+wine$diff <- wine$heart-wine$liver
+sum(!is.na(wine$diff))
 ```
 The wine dataset contains observations of variables related to wine consumption for 21 countries. We would like to use this data to test whether countries have more deaths from heart disease or from liver disease.
 
@@ -144,25 +147,23 @@ summary(wine$heart)
 summary(wine$liver)
 ```
 
-
-2) IID data.
-  - In particular, each pair $(X_i,Y_i)$ is drawn from the same distribution, independently of all other pairs.
-  
-Let $X_i$ be the number of deaths caused by heart disease in country i and $Y_i$ be the number of deaths caused by liver disease in the same country i, such that, both, $X_i$ and $Y_i$ are pairs of the same total distribution of death of the same country, making the pair naturally dependent by virtue of being part of the same country, and independent from other pairs, belonging to other countries. In this way, we find that we can generate pairs ($X_i$,$Y_i$) from the same distribution and independently of other pairs, thus, meeting this assumption as well. This can be seen in the following distribution \@ref(plot:histogram-dist)
-
+Here we plot the distribution of both Heart and Liver Disease Death to further assess that these lie on a metric scale\@ref(plot:histogram-dist).
 ```{r histogram-dist, fig.cap='Distribution of Heart and Liver Disease Related Death', fig.pos='!b', fig.width=12, fig.height = 4}
 par(mfrow=c(1,2)) 
 hist(wine$heart, xlab="Heart Disease Related Death", main="Heart Disease Related Death")
 hist(wine$liver, xlab="Liver Disease Related Death", main="Liver Disease Related Death")
 ```
 
+2) IID data.
+  - In particular, each pair $(X_i,Y_i)$ is drawn from the same distribution, independently of all other pairs.
+  
+Let $X_i$ be the number of deaths caused by heart disease in country i and $Y_i$ be the number of deaths caused by liver disease in the same country i, such that, both, $X_i$ and $Y_i$ are pairs of the same total distribution of death of the same country, making the pair naturally dependent by virtue of being part of the same country, and independent from other pairs, belonging to other countries. In this way, we find that we can generate pairs ($X_i$,$Y_i$) from the same distribution and independently of other pairs, thus, meeting this assumption as well.
+
 3) The distribution of the difference $X - Y$ is symmetric around some mean $\mu$
 
 Here the number of observations for the differences between death by heart disease and death by liver disease is calculated to be n=21. This number is not large enough to meet the 30 minimum as ascribed by the the Central Limit Theorem. Additionally, when plotted in a histogram, we see that the distribution does not show a normal distribution either. For those reasons, we agree that the assumption that the distribution of the difference $X - Y$ is symmetric around some mean $\mu$ is not met.
 
 ```{r}
-wine$diff <- wine$heart-wine$liver
-sum(!is.na(wine$diff))
 hist(wine$heart-wine$liver, 
      xlab="Differences", 
      main='Differences between Heart/Liver Disease Death', 
@@ -171,7 +172,7 @@ hist(wine$heart-wine$liver,
 
 
 ### Attitudes toward the religious
-```{r}
+```{r, include=FALSE}
 GSS_religion <- read.csv('datasets/GSS_religion.csv')
 head(GSS_religion)
 ```
@@ -186,10 +187,9 @@ summary(GSS_religion$cathtemp)
 To assess whether the two protemp and cathtemp samples are on a metric scale, we evaluated if the data is presented with a degree of difference between categories. From the description of the feeling thermometer (a 0-100 rating), a rating between 50 degrees and 100 degrees means that one feels favorable and warm toward the group and a rating between 0 degrees and 50 degrees means that one does not feel favorable toward the group. Theoretically, if one looks at the interval [49,51] one can see that any values between 50 to 51 degrees fall into the favorable group while any values between 49 to 50 fall into the unfavorable group. Using this logic, we find that there is information between interval for these two samples. Therefore, the assumption of metric scale is met.
 
 2) IID data.
- - In particular, each pair of measurements $(X_i, Y_i)$ is drawn from the same distribution, independently of all other pairs.
+ - In particular, each pair of measurements ($X_i$, $Y_i$) is drawn from the same distribution, independently of all other pairs.
 
-The description of the GSS questions suggested that the feeling thermometer is a rating from 0 to 100. The rating is obtain by asking the participant to give a rating. Keeping this in mind when viewing the summary of the two samples in this dataset, prottemp and cathtemp, we see that both have a minimum value of 0 and a maximum value of 100. Additionally, the inner quartile range, computed by taking the difference between the 3rd quartile and the 1st quartile, is equal to 35 for both samples. From this standpoint, each sample pair (X_i, Y_i) is drawn from the same distribution ranging from a scale of 0 to 100 shown in Figure \@ref(fig:box-plot). Therefore they are identically distributed. In terms of independence, because a given sample pair (X_i, Y_i) is an individual's rating on a protestant group and catholic group, it provides no information on another user rating for the two groups, we conclude that each sample pair is independent. For these reason, we believe that the assumption of IID data is met.
-
+The description of the GSS questions suggested that the feeling thermometer is a rating from 0 to 100. The rating is obtain by asking the participant to give a rating. Keeping this in mind when viewing the summary of the two samples in this dataset, prottemp and cathtemp, we see that both have a minimum value of 0 and a maximum value of 100. Additionally, the inner quartile range, computed by taking the difference between the 3rd quartile and the 1st quartile, is equal to 35 for both samples. From this standpoint, each sample pair ($X_i$, $Y_i$) is drawn from the same distribution ranging from a scale of 0 to 100 shown in Figure \@ref(fig:box-plot). Therefore they are identically distributed. In terms of independence, because a given sample pair ($X_i$, $Y_i$) is an individual's rating on a protestant group and catholic group, it provides no information on another user rating for the two groups, we conclude that each sample pair is independent. For these reason, we believe that the assumption of IID data is met.
 
 ```{r box-plot, fig.cap='Distribution of Protestant and Catholic Temperature', fig.pos='!b', fig.width=12, fig.height = 4}
 par(mfrow=c(1,2)) 
@@ -201,9 +201,11 @@ b2 <- boxplot(GSS_religion$cathtemp, main="Catholic Temperature")
 3) The distribution of the difference between measurements has no major deviations from normality, considering the sample size.
  - In particular, the t-test is invalid for highly skewed distributions when sample size is larger than 30. It may also be invalid for very highly skewed distributions at higher sample sizes.
  
+To assess if the difference between the two measurements has no major deviation from normality, we first need to compute the differences between the two samples and count the number of non-NAN values in a results column. Here we see that the sample size is n=802, which exceeds a minimum bound of n=30. For this reason, we agree that the Central Limit Theorem assumption is met, approximating a normal distribution. Viewing the histogram with number of bins(breaks) = 10, we also see that the sample is relatively distributed with center at approximately 0. For these reasons, the assumption of no deviation from normality is met.
+
 ```{r}
 hist(GSS_religion$prottemp-GSS_religion$cathtemp, 
      xlab="Differences",
      main='Differences between Protemp and Cathtemp', breaks=10)
 ```
-To assess if the difference between the two measurements has no major deviation from normality, we first need to compute the differences between the two samples and count the number of non-NAN values in a results column. Here we see that the sample size is n=802, which exceeds a minimum bound of n=30. For this reason, we agree that the Central Limit Theorem assumption is met, approximating a normal distribution. Viewing the histogram with number of bins(breaks) = 10, we also see that the sample is relatively distributed with center at approximately 0. For these reasons, the assumption of no deviation from normality is met.
+
