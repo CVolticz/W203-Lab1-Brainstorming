@@ -1,6 +1,6 @@
 ---
 title: "Part Two"
-author: "PUT YOUR GROUP NAMES HERE"
+author: "Ken Trinh, Kesha Julien, David Corrales Garcia"
 date: "2/14/2022"
 output:
   pdf_document:
@@ -243,9 +243,7 @@ Our analysis leverage data from the 2020 American National Election Studies (ANE
 * Finally, to identify those who experience difficulties in voting, we will collect data based on a survey report of individuals experiencing difficulties to vote on a Likert scale from 1 to 5 with 1 being not difficult at all and 5 being extremely difficult. This information would enable us to measure the level of difficulties among individuals of each party.
 
 
-Data wrangling
-First, we isolated the following columns from the main dataset and renamed them as seen in Table \@ref(tab:data columns identification)
-
+# Data wrangling
 ```{r data columns identification}
 kable(
   renamed_table,
@@ -253,12 +251,11 @@ kable(
   booktabs = TRUE, 
 )
 ```
+First, we isolated the following columns from the main dataset and renamed them as seen in Table \@ref(tab:data columns identification)
 
 Second, we filtered out any data points that had negative values and labeled them as NA because according to the ANES dataset dictionary, negative integers mean that there was either no answer for this individual or the surveyor had experienced some form of technical difficulties when interacting with this individual. 
 
 According to our conceptualization of voters, we identified three columns that contain information on voters. These columns are people who experienced difficulty in voting, people who registered to vote, and people who have voted. Using these columns, we created the following conditional statements: Voters are people who have voted or have not voted and have registered or have not registered but have experience difficulty in registering. We stored this column as a Boolean statement named isVoter
-
-To identify voter partisanship, we used the columns party identification, strong party identification, and leaning party identificationto create we created a conditional statement to generate two dataset, republicans identified voters and democrats identified voters. We summarized the result as percentage of voters in Table \@ref(tab:summary-table)
 
 ```{r summary-table}
 kable(
@@ -269,13 +266,12 @@ kable(
 )
 ```
 
-# Hypothesis testing
-To begin hypothesis testing, we formulate a null hypothesis and an alternate hypothesis. We decided to go with the alternative hypothesis that Democratic voters experience more difficulty than Republican voters based on our analysis of the data is represented in Figure \@ref(fig:voter-difficulties). The white portion, represents the percentage of voters experience no difficulty, is larger for Republicans(right) than Democrats(left)
+To identify voter partisanship, we used the columns party identification, strong party identification, and leaning party identificationto create we created a conditional statement to generate two dataset, republicans identified voters and democrats identified voters. We summarized the result as percentage of voters in Table \@ref(tab:summary-table)
 
+
+
+# Hypothesis testing
 ```{r voter-difficulties, fig.cap='Percentage of Voters Experience Difficulties for Republicans(Left) vs Democrats(Right)', fig.pos='!b', fig.width=6, fig.height = 4}
-#knitr::kable(list(rep_voters_difficulties, dem_voters_difficulties), digits = 2,
-#               caption = 'Percentage of Republicans (Left) and Democrats (Right) Voter Experiencing #Difficulties', 
-#)
 # set the plotting area into a 1*2 array
 label <- c('Not difficulty','A little difficult','Moderately difficult',
             'Very difficult','Extremely difficult')
@@ -285,6 +281,10 @@ par(mfrow=c(1,2))
 pie(rep_voters_difficulties$Percent, labels = paste0(round(rep_voters_difficulties$Percent, 2), "%"), main="Republican Voters")
 pie(dem_voters_difficulties$Percent, labels = paste0(round(dem_voters_difficulties$Percent, 2), "%"), main="Democrats Voters")
 ```
+
+To begin hypothesis testing, we formulate a null hypothesis and an alternate hypothesis. We decided to go with the alternative hypothesis that Democratic voters experience more difficulty than Republican voters based on our analysis of the data is represented in Figure \@ref(fig:voter-difficulties). The white portion, represents the percentage of voters experience no difficulty, is larger for Republicans(right) than Democrats(left)
+
+
 
 Null Hypothesis, ($H_o$):
 The probability that a Republican voter’s level of difficulty is higher than that of a Democratic voter is the same as the probability that a Democratic voter’s level of difficulty is higher than that of a Republican voter:
@@ -305,11 +305,13 @@ To test our hypothesis, we used the Wilcoxon Rank Sum Test (Hypothesis of Compar
 
 # Test Results
 ```{r Wilcoxon Rank Sum Test, echo=TRUE}
-wilcox.test(democrats_voters$difficult_to_vote, 
-            republicans_voters$difficult_to_vote, 
-            paired = FALSE, 
-            alternative = "greater")
+wilcox_test <- wilcox.test(democrats_voters$difficult_to_vote, 
+                          republicans_voters$difficult_to_vote, 
+                          paired = FALSE, 
+                          alternative = "greater")
 ```
 For our Wilcoxon rank sum test, we set X parameter to Democratic voters, the Y parameter to Republican Voters, and the alternative hypothesis parameter to greater, indicating that we want to test the alternative hypothesis that Democratic voters experienced a greater level of difficulty that Republican voters. 
 
-The Wilcoxon rank sum test result showed significant evidence that tDemocratic voters had a higher probability of experiencing difficulty in voting than Republican voters in the 2020 presidential election (W = 3840387, p = 0.000855). With our p-value being less than 0.05, we can reject the null hypothesis. 
+
+The Wilcoxon rank sum test result showed significant evidence that Democratic voters had a higher probability of experiencing difficulty in voting than Republican voters in the 2020 presidential election (W = 3840387, p = 0.000855). With our p-value being less than 0.05, we can reject the null hypothesis. This means that Democratic voters experienced higher levels of difficulty in voting than that of their Republican peers. Which seems to be in alignment with the allegations of voter suppression and irregularities noted in the 2020 presidential elections.By understanding the patterns of voting difficulties, law makers can enact initiatives to ensure that all voters are able to freely and fairly vote, potentially increase voter turnout in future elections.
+
